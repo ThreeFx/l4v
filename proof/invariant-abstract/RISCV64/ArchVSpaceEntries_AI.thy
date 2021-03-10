@@ -343,13 +343,18 @@ lemma schedule_valid_vspace_objs'[wp]:
   "\<lbrace>valid_vspace_objs'\<rbrace> schedule :: (unit,unit) s_monad \<lbrace>\<lambda>_. valid_vspace_objs'\<rbrace>"
   unfolding schedule_def by (wpsimp wp: alternative_wp select_wp hoare_drop_imps)
 
+crunches update_time_stamp
+  for ct_running[wp]: ct_running
+  and pred_tcb_at[wp]: "pred_tcb_at proj P t"
+  and pred_tcb_at_ct[wp]: "\<lambda>s. pred_tcb_at proj P (cur_thread s) s"
+
 (* FIXME RT: clean up the duplication here (also in ARM); factor out handle_event? *)
 lemma call_kernel_valid_vspace_objs'[wp]:
   "\<lbrace>invs and (\<lambda>s. e \<noteq> Interrupt \<longrightarrow> ct_running s) and valid_vspace_objs' and
     (\<lambda>s. scheduler_action s = resume_cur_thread) and (\<lambda>s. is_schedulable_bool (cur_thread s) s)\<rbrace>
       (call_kernel e) :: (unit,unit) s_monad
    \<lbrace>\<lambda>_. valid_vspace_objs'\<rbrace>"
-  apply (cases e, simp_all add: call_kernel_def)
+  apply (cases e, simp_all add: call_kernel_def preemption_path_def)
        apply (rule hoare_seq_ext[rotated])
         apply (rule validE_valid)
         apply (rule_tac Q="\<lambda>_. valid_vspace_objs'" in handleE_wp[rotated])
