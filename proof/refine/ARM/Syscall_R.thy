@@ -387,7 +387,7 @@ lemma setDomain_corres:
 lemma pinv_corres:
   "\<lbrakk> inv_relation i i'; call \<longrightarrow> block \<rbrakk> \<Longrightarrow>
    corres (dc \<oplus> (=))
-     (einvs and valid_invocation i
+     (einvs and valid_machine_time and valid_invocation i
             and (\<lambda>s. schact_is_rct s)
             and current_time_bounded 1
             and ct_active
@@ -1814,31 +1814,6 @@ proof -
   done *)
 qed
 
-lemma inv_irq_IRQInactive:
-  "\<lbrace>\<top>\<rbrace> performIRQControl irqcontrol_invocation
-  -, \<lbrace>\<lambda>rv s. intStateIRQTable (ksInterruptState s) rv \<noteq> irqstate.IRQInactive\<rbrace>"
-  apply (simp add: performIRQControl_def)
-  apply (rule hoare_pre)
-   apply (wpc|wp|simp add: ARM_H.performIRQControl_def)+
-  done
-
-lemma inv_arch_IRQInactive:
-  "\<lbrace>\<top>\<rbrace> Arch.performInvocation invocation
-  -, \<lbrace>\<lambda>rv s. intStateIRQTable (ksInterruptState s) rv \<noteq> irqstate.IRQInactive\<rbrace>"
-  apply (simp add: ARM_H.performInvocation_def performARMMMUInvocation_def)
-  apply wp
-  done
-
-lemma retype_pi_IRQInactive:
-  "\<lbrace>valid_irq_states'\<rbrace> RetypeDecls_H.performInvocation blocking call canDonate v
-   -, \<lbrace>\<lambda>rv s. intStateIRQTable (ksInterruptState s) rv \<noteq> irqstate.IRQInactive\<rbrace>"
-  apply (simp add: Retype_H.performInvocation_def)
-  apply (rule hoare_pre)
-   apply (wpc
-          | wpsimp wp: inv_tcb_IRQInactive inv_cnode_IRQInactive inv_irq_IRQInactive
-                       inv_untyped_IRQInactive inv_arch_IRQInactive
-                 simp: stateAssertE_def stateAssert_def)+
-  done
 
 end
 
