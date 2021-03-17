@@ -18,6 +18,10 @@ requalify_facts
 
 end
 
+lemma read_sched_context_NoneD:
+  "read_sched_context scp s = None \<Longrightarrow> \<not>(\<exists>n sc. kheap s scp = Some (SchedContext sc n))"
+  by (clarsimp simp: read_sched_context_def obind_def split: kernel_object.split_asm)
+
 lemma no_cap_to_idle_sc_ptr:
   "\<lbrakk>cte_wp_at ((=) (SchedContextCap a b)) slot s; invs s\<rbrakk> \<Longrightarrow> a \<noteq> idle_sc_ptr"
   by (fastforce simp: invs_def valid_state_def cap_range_def dest!: valid_global_refsD)
